@@ -1,3 +1,13 @@
+<?php 
+require_once 'init.php';
+
+
+$db = Database::getInstance();
+$person = $db->get("users", ["id", "=", $_GET['id']])->first();
+
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,19 +29,37 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
+       <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#">Главная</a>
+            <a class="nav-link" href="index.php">Главная</a>
           </li>
+          <?php if($user->hasPermissions('admin')): ?>
+          <li class="nav-item">
+              <a class="nav-link" href="users_control.php">Управление пользователями</a>
+          </li>
+          <?php endif; ?>
         </ul>
 
-        <ul class="navbar-nav">
+         <ul class="navbar-nav">
+          <?php if(!$user->isLoggedIn()): ?>          
           <li class="nav-item">
-            <a href="#" class="nav-link">Войти</a>
+            <a href="login.php" class="nav-link">Войти</a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">Регистрация</a>
+            <a href="register.php" class="nav-link">Регистрация</a>
           </li>
+          <?php else: ?>
+          <li class="nav-item">
+            <p class="nav-link">Добро пожаловать, <?= $user->data()->name; ?>! &nbsp;&nbsp;|</p>
+          </li>
+
+          <li class="nav-item">
+            <a href="profile.php?id=<?= $user->data()->id; ?>" class="nav-link">Профиль</a>
+          </li>
+          <li class="nav-item">
+            <a href="logout.php" class="nav-link">Выйти</a>
+          </li>
+          <?php endif; ?>          
         </ul>
       </div>
     </nav>
@@ -50,10 +78,10 @@
 
            <tbody>
              <tr>
-               <td>2</td>
-               <td>Джон</td>
-               <td>25/02/2025</td>
-               <td>Привет! Я новый пользователь вашего проекта, хочу перейти на уровень 3!</td>
+               <td><?= $person->id; ?></td>
+               <td><?= $person->name; ?></td>
+               <td><?= User::register_date($person->date); ?></td>
+               <td><?= $person->status; ?></td>
              </tr>
            </tbody>
          </table>

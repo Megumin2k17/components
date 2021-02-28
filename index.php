@@ -1,3 +1,12 @@
+<?php 
+require_once 'init.php';
+
+$db = Database::getInstance();
+$users = $db->query('SELECT * FROM users')->results();
+
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,20 +30,48 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#">Главная</a>
+            <a class="nav-link" href="index.php">Главная</a>
           </li>
+          <?php if($user->hasPermissions('admin')): ?>
+          <li class="nav-item">
+              <a class="nav-link" href="users_control.php">Управление пользователями</a>
+          </li>
+          <?php endif; ?>
         </ul>
 
         <ul class="navbar-nav">
+          <?php if(!$user->isLoggedIn()): ?>          
           <li class="nav-item">
-            <a href="#" class="nav-link">Войти</a>
+            <a href="login.php" class="nav-link">Войти</a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">Регистрация</a>
+            <a href="register.php" class="nav-link">Регистрация</a>
           </li>
+          <?php else: ?>
+          <li class="nav-item">
+            <p class="nav-link">Добро пожаловать, <?= $user->data()->name; ?>! &nbsp;&nbsp;|</p>
+          </li>
+
+          <li class="nav-item">
+            <a href="profile.php?id=<?= $user->data()->id; ?>" class="nav-link">Профиль</a>
+          </li>
+          <li class="nav-item">
+            <a href="logout.php" class="nav-link">Выйти</a>
+          </li>
+          <?php endif; ?>          
         </ul>
       </div>
     </nav>
+
+    <?php if(Session::exists('success')): ?>
+      <div class="alert alert-success">
+        <?php echo Session::flash('success'); ?>          
+      </div>
+    <?php elseif(Session::exists('danger')): ?>
+        <div class="alert alert-danger">
+        <?php echo Session::flash('danger'); ?>          
+        </div>
+    <?php endif; ?>
 
   <div class="container">
     <div class="row">
@@ -44,7 +81,7 @@
           <p class="lead">Это дипломный проект по разработке на PHP. На этой странице список наших пользователей.</p>
           <hr class="my-4">
           <p>Чтобы стать частью нашего проекта вы можете пройти регистрацию.</p>
-          <a class="btn btn-primary btn-lg" href="#" role="button">Зарегистрироваться</a>
+          <a class="btn btn-primary btn-lg" href="register.php" role="button">Зарегистрироваться</a>
         </div>
       </div>
     </div>
@@ -63,26 +100,15 @@
           </thead>
 
           <tbody>
+            <?php foreach($users as $user): ?>
             <tr>
-              <td>1</td>
-              <td><a href="#">Rahim</a></td>
-              <td>rahim@marlindev.ru</td>
-              <td>12/03/2025</td>
+              <td><?= $user->id; ?></td>
+              <td><a href="user_profile.php?id=<?= $user->id; ?>"><?= $user->name; ?></a></td>
+              <td><?= $user->email; ?></td>
+              <td><?= User::register_date($user->date); ?></td>
             </tr>
-
-            <tr>
-              <td>2</td>
-              <td><a href="#">John</a></td>
-              <td>john@marlindev.ru</td>
-              <td>12/03/2025</td>
-            </tr>
-
-            <tr>
-              <td>3</td>
-              <td><a href="#">Jane</a></td>
-              <td>jane@marlindev.ru</td>
-              <td>12/03/2025</td>
-            </tr>
+            <?php endforeach; ?>
+            
           </tbody>
         </table>
       </div>
